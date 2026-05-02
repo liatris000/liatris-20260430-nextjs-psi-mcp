@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSI MCP × Claude Code — Before/After ショーケース</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<style>
+  :root {
+    --accent: #eb5927;
+    --bg-1: #1a1a2e;
+    --bg-2: #16213e;
+    --bg-3: #0f3460;
+    --fg: #e8e8ee;
+    --muted: #a0a0b0;
+    --card: rgba(255, 255, 255, 0.04);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --before: #ff7878;
+    --after: #6ee7b7;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    background-attachment: fixed;
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.7;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(235, 89, 39, 0.10) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(88, 109, 204, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+  header {
+    margin-bottom: 64px;
+  }
+  .tag {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 0.04em;
+  }
+  h1 {
+    font-size: 32px;
+    line-height: 1.35;
+    margin: 0 0 16px;
+    font-weight: 700;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0 0 8px;
+  }
+  .lede a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .lede a:hover { text-decoration: underline; }
+  section.improvement {
+    margin: 56px 0;
+    padding: 28px 28px 24px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+  }
+  section.improvement h2 {
+    font-size: 20px;
+    margin: 0 0 4px;
+    font-weight: 700;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  section.improvement h2 .metric {
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(235, 89, 39, 0.12);
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  section.improvement .summary {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 20px;
+  }
+  .ba-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 760px) {
+    .ba-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .ba-block .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .ba-block.before .label { color: var(--before); }
+  .ba-block.after .label { color: var(--after); }
+  pre {
+    margin: 0;
+    border-radius: 8px;
+    overflow: auto;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  pre code.hljs {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: #0d1117;
+  }
+  .mcp-section {
+    margin-top: 72px;
+    padding: 28px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+  }
+  .mcp-section h2 {
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+  .mcp-section .summary {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 16px;
+  }
+  .copy-wrap {
+    position: relative;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--fg);
+    border: 1px solid var(--card-border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .copy-btn:hover { background: rgba(255, 255, 255, 0.14); }
+  .copy-btn.copied { background: var(--accent); border-color: var(--accent); }
+  footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--card-border);
+    color: var(--muted);
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="tag">PSI MCP × Claude Code</div>
+    <h1>Next.js Core Web Vitals — Before / After ショーケース</h1>
+    <p class="lede">
+      Zenn 記事
+      <a href="https://zenn.dev/liatris" target="_blank" rel="noopener">
+        「PSI MCP × Claude Code で Core Web Vitals を改善する」
+      </a>
+      で取り上げた 4 つの改善のコード比較。
+    </p>
+    <p class="lede">
+      Lighthouse の Opportunities から 1 項目ずつ拾って、Before の状態と After の差分だけを見る形にしている。
+    </p>
+  </header>
+
+  <section class="improvement">
+    <h2>ヒーロー画像 <span class="metric">LCP</span></h2>
+    <p class="summary">
+      <code>&lt;img&gt;</code> を <code>next/image</code> に置き換えると <code>&lt;link rel="preload"&gt;</code> が生成され、LCP 要素の発見が早くなる。<code>sizes</code> を省略するとモバイルで不必要に大きい画像を送り続けてしまうので忘れず指定する。
+    </p>
+    <div class="ba-grid">
+      <div class="ba-block before">
+        <div class="label">Before</div>
+<pre><code class="language-tsx">&lt;img
+  src="/hero.jpg"
+  alt="hero"
+  style={{ width: '100%' }}
+/&gt;</code></pre>
+      </div>
+      <div class="ba-block after">
+        <div class="label">After</div>
+<pre><code class="language-tsx">import Image from 'next/image'
+
+&lt;Image
+  src="/hero.jpg"
+  alt="hero"
+  width={1200}
+  height={600}
+  priority
+  sizes="(max-width: 768px) 100vw, 1200px"
+/&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="improvement">
+    <h2>フォント <span class="metric">FCP / LCP</span></h2>
+    <p class="summary">
+      Google Fonts を <code>&lt;link&gt;</code> で読み込むとレンダリングブロッキングが発生する。<code>next/font</code> に切り替えるとセルフホスティングされ、外部リクエストが消える。
+    </p>
+    <div class="ba-grid">
+      <div class="ba-block before">
+        <div class="label">Before</div>
+<pre><code class="language-html">&lt;!-- _document.tsx で直書き --&gt;
+&lt;link
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&amp;display=swap"
+  rel="stylesheet"
+/&gt;</code></pre>
+      </div>
+      <div class="ba-block after">
+        <div class="label">After</div>
+<pre><code class="language-tsx">import { Noto_Sans_JP } from 'next/font/google'
+
+const noto = Noto_Sans_JP({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+})
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="ja" className={noto.className}&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  )
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="improvement">
+    <h2>サードパーティスクリプト <span class="metric">TBT</span></h2>
+    <p class="summary">
+      チャット系ウィジェットの直書きを <code>next/script</code> の <code>lazyOnload</code> に変えると、全リソース読み込み後に実行されてメインスレッドのブロックがなくなる。<code>afterInteractive</code> はインタラクションと重なるケースがあったため避けた。
+    </p>
+    <div class="ba-grid">
+      <div class="ba-block before">
+        <div class="label">Before</div>
+<pre><code class="language-tsx">&lt;script
+  src="https://example-chat.com/widget.js"
+&gt;&lt;/script&gt;</code></pre>
+      </div>
+      <div class="ba-block after">
+        <div class="label">After</div>
+<pre><code class="language-tsx">import Script from 'next/script'
+
+&lt;Script
+  src="https://example-chat.com/widget.js"
+  strategy="lazyOnload"
+/&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="improvement">
+    <h2>Tailwind CSS の purge <span class="metric">Speed Index</span></h2>
+    <p class="summary">
+      <code>app/</code> ディレクトリ構成に移行した際に <code>content</code> パスが古いままだと purge が効かず、未使用スタイルが大量に含まれてしまう。Lighthouse の「Remove unused CSS」が Opportunities に出ていたら真っ先に疑う場所。
+    </p>
+    <div class="ba-grid">
+      <div class="ba-block before">
+        <div class="label">Before</div>
+<pre><code class="language-javascript">module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+  ],
+}</code></pre>
+      </div>
+      <div class="ba-block after">
+        <div class="label">After</div>
+<pre><code class="language-javascript">module.exports = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="mcp-section">
+    <h2>.claude/mcp.json — PSI MCP の接続設定</h2>
+    <p class="summary">
+      Next.js プロジェクトのルートにこの設定を置き、Claude Code を再起動すると <code>pagespeed</code> ツールが有効になる。
+    </p>
+    <div class="copy-wrap">
+      <button class="copy-btn" id="copyBtn">Copy</button>
+<pre><code class="language-json" id="mcpCode">{
+  "mcpServers": {
+    "pagespeed": {
+      "command": "npx",
+      "args": ["-y", "pagespeed-insights-mcp"],
+      "env": {
+        "PSI_API_KEY": "&lt;YOUR_GOOGLE_CLOUD_API_KEY&gt;"
+      }
+    }
+  }
+}</code></pre>
+    </div>
+  </section>
+
+  <footer>
+    <span>
+      Source:
+      <a href="https://github.com/liatris000/liatris-20260430-nextjs-psi-mcp" target="_blank" rel="noopener">
+        liatris000/liatris-20260430-nextjs-psi-mcp
+      </a>
+    </span>
+    <span>zenn.dev/liatris</span>
+  </footer>
+</main>
+
+<script>
+  hljs.highlightAll();
+
+  const btn = document.getElementById('copyBtn');
+  const code = document.getElementById('mcpCode');
+  btn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(code.textContent);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1500);
+    } catch (e) {
+      btn.textContent = 'Failed';
+    }
+  });
+</script>
+</body>
+</html>

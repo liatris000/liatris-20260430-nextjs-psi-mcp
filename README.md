@@ -2,6 +2,18 @@
 
 Zenn 記事「PSI MCP × Claude Code で Core Web Vitals を改善する」の実装サンプルです。
 
+## ブラウザで Before/After を見るショーケース
+
+GitHub Pages: <https://liatris000.github.io/liatris-20260430-nextjs-psi-mcp/>
+
+`index.html` 1 枚で 4 つの改善を Before/After のコード比較として並べたページです。構成:
+
+1. ヒーロー画像 (LCP) — `<img>` → `next/image` + `priority` + `sizes`
+2. フォント (FCP / LCP) — Google Fonts `<link>` → `next/font`
+3. サードパーティスクリプト (TBT) — 直書き `<script>` → `next/script` `lazyOnload`
+4. Tailwind CSS の purge (Speed Index) — `content` パス更新
+5. `.claude/mcp.json` 設定例 (コピーボタン付き)
+
 ## セットアップ
 
 ### 1. Google Cloud API キーを発行
